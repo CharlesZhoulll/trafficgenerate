@@ -12,7 +12,7 @@ def finish(*args):
     sys.exit(0)
 
 def startServer(serverID, port):
-    cmd = 'iperf3' + ' -R  -c ' + serverIp + ' -p ' + str(port) + ' -t ' + str(time)
+    cmd = 'iperf3' + ' -c -R ' + serverIp + ' -p ' + str(port) + ' -t ' + str(time)
     print cmd
     os.system(cmd)
 
