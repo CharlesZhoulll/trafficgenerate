@@ -1,10 +1,10 @@
 import sys, threading, os, subprocess
 import sys, signal
 
-nServers = 4
+nClients = 4
 basePort = 10000
 serverIp = '129.10.99.173'
-time = 10
+time = 60
 procs = []
 
 def finish(*args):
@@ -12,7 +12,7 @@ def finish(*args):
     sys.exit(0)
 
 def startServer(serverID, port):
-    cmd = 'iperf3' + ' -c -R ' + serverIp + ' -p ' + str(port) + ' -t ' + str(time)
+    cmd = 'iperf3' + ' -R  -c ' + serverIp + ' -p ' + str(port) + ' -t ' + str(time)
     print cmd
     os.system(cmd)
 
