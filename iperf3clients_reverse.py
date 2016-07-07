@@ -1,10 +1,10 @@
 import sys, threading, os, subprocess
 import sys, signal
 
-nServers = 4
+nClients = 4
 basePort = 10000
 serverIp = '129.10.99.173'
-time = 10
+time = 60
 procs = []
 
 def finish(*args):
@@ -18,7 +18,7 @@ def startServer(serverID, port):
 
 def run():
     os.system("pkill iperf3")
-    for i in xrange(nServers):
+    for i in xrange(nClients):
         port = basePort + i
         thread = threading.Thread(target = startServer, args = (i + 1, port))
         thread.start()
