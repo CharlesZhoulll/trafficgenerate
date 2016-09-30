@@ -1,7 +1,7 @@
 import sys, threading, os, subprocess
 import sys, signal
 
-nServers = 4
+nClients = 1
 basePort = 10000
 serverIp = '129.10.99.173'
 time = 10
@@ -12,12 +12,13 @@ def finish(*args):
     sys.exit(0)
 
 def startServer(serverID, port):
-    cmd = 'iperf3' + ' -c ' + serverIp + ' -p ' + str(port) + ' -t ' + str(time)
+    cmd = 'iperf3' + ' -R  -c ' + serverIp + ' -p ' + str(port) + ' -t ' + str(time)
+    print cmd
     os.system(cmd)
 
 def run():
     os.system("pkill iperf3")
-    for i in xrange(nServers):
+    for i in xrange(nClients):
         port = basePort + i
         thread = threading.Thread(target = startServer, args = (i + 1, port))
         thread.start()
@@ -25,6 +26,7 @@ def run():
     signal.pause()
 
 if __name__ == '__main__':
+    print "Parameters: nClients, basePort, serverIp, time"
     if len(sys.argv) >= 4:
         nClients = int(sys.argv[1])
         basePort = int(sys.argv[2])

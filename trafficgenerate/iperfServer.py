@@ -4,7 +4,6 @@ import sys, signal
 nServers = 1
 basePort = 10000
 time = 10
-procs = []
 
 def finish(*args):
     os.system("pkill iperf3")
@@ -24,6 +23,7 @@ def run():
     signal.pause()
 
 if __name__ == '__main__':
+    print "Parameters: nServers, basePort"
     if len(sys.argv) >= 2:
         nServers = int(sys.argv[1])
         basePort = int(sys.argv[2])
