@@ -58,7 +58,11 @@ static int full __read_mostly;
 MODULE_PARM_DESC(full, "Full log (1=every ack packet received,  0=only cwnd changes)");
 module_param(full, int, 0);
 
-static const char procname[] = "tcpprobe";
+static char *procname = "tcpprobe";
+module_param(procname, charp, 0);
+MODULE_PARM_DESC(procname, "Default proc name tcpprobe");
+
+
 
 struct tcp_log {
 	ktime_t tstamp;
