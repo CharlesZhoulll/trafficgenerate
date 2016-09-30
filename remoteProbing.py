@@ -8,7 +8,7 @@ host = "129.10.99.173" # Remote server ip address
 uname = "fan_tcp" # Username
 password = "Ell-301" # Need for sudo execute command
 rsa = "/home/charles/.ssh/id_rsa" # Need for auto login
-remoteAddr = "/home/fan_tcp/Documents/fan/tcpprobe/" # Remote working dir
+remoteModuleDir = "/home/fan_tcp/Documents/fan/tcpprofiling/tcp_probe/" # Remote working dir
 traceFile = "tcptrace" # Tracefile name
 port = 12345 # Port the tcpprobe should listen to
 jobs = []
@@ -39,27 +39,33 @@ def finish(*args):
             job.terminate()
             job.join()
     cleanTcpProbe()
-    fetch(remoteAddr + traceFile)
+    if not fetch(remoteModuleDir + traceFile):
+        print "Error ! Fail to retrieve profile, please check to see if your tcp probe module work properly !"
+        sys.exit(0)
     parse(traceFile)
-    os.remove(traceFile)
     sys.exit(0)
 
 def cleanTcpProbe():
-    print "Stop tcptuning ..."
+    print "Stop probing ..."
     client = connect()
     cmds = []
     cmds.append('pkill cat')
-    cmds.append('rmmod ' + remoteAddr + 'tcp_tuning.ko')
+    cmds.append('rmmod ' + remoteModuleDir + 'tcp_tuning.ko')
     for cmd in cmds:
         execute(client, cmd, True)
 
 def fetch(fileDirectory):
     print('Fetching ' + fileDirectory)
     client = connect()
-    scp = SCPClient(client.get_transport())
-    scp.get(fileDirectory)
-    scp.close()
-    client.close()
+    try:
+        scp = SCPClient(client.get_transport())
+        scp.get(fileDirectory)
+        scp.close()
+        client.close()
+        return True
+    except:
+        client.close()
+        return False
 
 def connect():
     client = paramiko.SSHClient()
@@ -76,14 +82,15 @@ def execute(client, cmd, sudo):
     return stderr.read()
 
 def startTcpTuning():
-    print "Running remote testing ..."
+    print "Running remote probing at host %s:%s" % (host, port)
+    print "Press CTRL+C to terminate..."
     client = connect()
     cmds = []
-    cmds.append('rmmod ' + remoteAddr + 'tcp_probe_fixed.ko')
-    cmds.append('insmod ' + remoteAddr + 'tcp_probe_fixed.ko '
-                + 'procname=' + '\"' + traceFile)
+    cmds.append('rmmod ' + remoteModuleDir + 'tcp_probe_fixed.ko')
+    cmds.append('insmod ' + remoteModuleDir + 'tcp_probe_fixed.ko '
+                + 'procname=' + '\"' + traceFile + '\"' + ' port=' + port)
     cmds.append('chmod 444 /proc/net/' + traceFile)
-    cmds.append('cat /proc/net/' + traceFile + ' > ' + remoteAddr + traceFile)
+    cmds.append('cat /proc/net/' + traceFile + ' > ' + remoteModuleDir + traceFile)
     for cmd in cmds:
         execute(client, cmd, True)
     client.close()
