@@ -1,5 +1,5 @@
-plot "tcpprofiling.10000" using 1:4 title "cwnd" with linespoints lt rgb 'red',\
-"tcpprofiling.10000" using 1:($11/125000) title "est_pkt" with lines lt rgb 'green',\
+plot "tcpprofiling.10000" using 1:8 title "cwnd" with linespoints lt rgb 'red',\
+"tcpprofiling.10000" using 1:9 title "est_pkt" with lines lt rgb 'green',\
 "tcpprofiling.10000" using 1:4 title "est_pkt" with lines lt rgb 'yellow',\
 "tcpprofiling.10000" using 1:4 title "est_pkt" with lines lt rgb 'brown'
 

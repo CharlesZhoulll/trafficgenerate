@@ -52,6 +52,8 @@ MODULE_VERSION("1.1");
 #define True 1
 #define False 0
 #define EVENT_BUF 1
+#define MIN_BW_SMPLE_RATE   (HZ/200)  // Min bw sampling rate, 5ms
+#define MAX_BW_SMPLE_RATE    HZ       // Max bw sampling rate, 1s
 
 static u16 bufsize = 4096;
 static char *procname = "tcpprofiling";
@@ -148,7 +150,6 @@ static inline u32 count_ack(struct sock *sk, struct socket_info *sk_info)
         }
     }
     sk_info->last_una = tp->snd_una;
-
     return cumul_ack;
 }
 
@@ -156,7 +157,8 @@ static inline void estimate_rtt(struct sock *sk, struct socket_info *sk_info)
 {
     const struct tcp_sock *tp = tcp_sk(sk);
     sk_info->rtt_smp = usecs_to_jiffies(tp->srtt_us >> 3);  // Transfer that into jiffer
-    sk_info->rtt_avg = filter(sk_info->rtt_avg, sk_info->rtt_smp);
+    // Min filter rtt
+    //sk_info->rtt_avg = filter(sk_info->rtt_avg, sk_info->rtt_smp);
 }
 
 static void estimate_tp(struct sock *sk, struct socket_info *sk_info)
@@ -166,12 +168,13 @@ static void estimate_tp(struct sock *sk, struct socket_info *sk_info)
 	const struct tcp_sock *tp = tcp_sk(sk);
 	s32 delta = tcp_time_stamp - sk_info->tp_left_ts;  // in hz
 	sk_info->total_byte_win += count_ack(sk, sk_info);
-	if (delta > sk_info->rtt_avg) {
+	if (delta > max_t(u32, MIN_BW_SMPLE_RATE, sk_info->rtt_smp)) {
+    pr_info("%u, %u\n", MIN_BW_SMPLE_RATE, sk_info->rtt_smp);
 		u32 bytes_th = (tp->snd_cwnd >> 3) * tp->mss_cache;
     // Avoid application limited issue: only take sample if:
     // (1) We have got at least 1/8*cwnd's samples
-    // (2) The time duration is between 1-2 RTT
-		if (sk_info->total_byte_win >= bytes_th && (delta <= 2*sk_info->rtt_avg)) {
+    // (2) The time duration is between 5ms - 1s
+		if (sk_info->total_byte_win >= bytes_th && (delta <= min_t(u32, MAX_BW_SMPLE_RATE, 2*sk_info->rtt_smp))) {
 			u32 tp_smp = sk_info->total_byte_win * HZ / delta;  // in byte/s
 			sk_info->tp_smp = tp_smp;
 			if (!sk_info->tp_avg) {
@@ -210,7 +213,7 @@ static inline void copy_to_tcp_info(struct sock *sk, struct sk_buff *skb, struct
     p->ssthresh = tcp_current_ssthresh(sk);
     p->length = skb == NULL ? 0 : skb->len;
     p->rtt_smp = sk_info->rtt_smp;
-    p->rtt_avg = sk_info->rtt_avg;
+    //p->rtt_avg = sk_info->rtt_avg;
     p->tp_avg = sk_info->tp_avg;
     p->tp_smp = sk_info->tp_smp;
     return;
@@ -219,9 +222,9 @@ static inline void copy_to_tcp_info(struct sock *sk, struct sk_buff *skb, struct
 static inline int tcptuning_sprint(struct tcp_log *p, char *tbuf, int n)
 {
     struct timespec tv = ktime_to_timespec(ktime_sub(ktime_get(), tcp_info.start));
-    int ret = scnprintf(tbuf, n, "%lu.%09lu %pI4:%u %pI4:%u %u %u %u %u %u %u %u\n",
+    int ret = scnprintf(tbuf, n, "%lu.%09lu %pI4:%u %pI4:%u %u %u %u %u %u %u\n",
             (unsigned long) tv.tv_sec, (unsigned long) tv.tv_nsec, &p->saddr, ntohs(p->sport),
-            &p->daddr, ntohs(p->dport), p->snd_cwnd, p->snd_wnd, p->ssthresh,  p->rtt_smp, p->rtt_avg,
+            &p->daddr, ntohs(p->dport), p->snd_cwnd, p->snd_wnd, p->ssthresh,  p->rtt_smp,
               p->tp_avg, p->tp_smp);
     return ret;
 }
