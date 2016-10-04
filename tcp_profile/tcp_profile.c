@@ -420,7 +420,7 @@ static ssize_t tcptuning_read(struct file *file, char __user *buf,
 
 static int tcptuning_release(struct inode *inode, struct file *file)
 {
-    printk("TCP profiling starts working. See you next time.\n");
+    printk("TCP profiling stops. See you next time.\n");
     return 0;
 }
 
@@ -493,7 +493,7 @@ static __init int tcptuning_init(void)
 
     bufsize = roundup_pow_of_two(bufsize);
     tcp_info.log = kcalloc(bufsize, sizeof(struct tcp_log), GFP_KERNEL);
-
+    pr_info("TCP profiling init... \n");
     if (!tcp_info.log)
     {
         pr_info("Fail to allocate memory for tcp_info.log !\n");
@@ -519,7 +519,7 @@ static __init int tcptuning_init(void)
         pr_info("Fail to init hash table !\n");
         goto err1;
     }
-    pr_info("TCP profiling starts working ! \n");
+    pr_info("TCP profiling starts... \n");
     return 0;
 
     err0:
