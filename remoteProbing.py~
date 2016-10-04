@@ -117,7 +117,6 @@ def startTcpTuning():
     cmds.append('chmod 444 /proc/net/' + traceFile)
     cmds.append('cat /proc/net/' + traceFile + ' > ' + remoteModuleDir + traceFile)
     for cmd in cmds:
-	print cmd
         execute(client, cmd, True)
     client.close()
 
