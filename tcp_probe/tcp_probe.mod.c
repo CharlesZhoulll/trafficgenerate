@@ -18,8 +18,6 @@ static const struct modversion_info ____versions[]
 __used
 __attribute__((section("__versions"))) = {
 	{ 0x53a8e63d, __VMLINUX_SYMBOL_STR(module_layout) },
-	{ 0x47c8baf4, __VMLINUX_SYMBOL_STR(param_ops_uint) },
-	{ 0xb6b46a7c, __VMLINUX_SYMBOL_STR(param_ops_int) },
 	{ 0x5d41c87c, __VMLINUX_SYMBOL_STR(param_ops_charp) },
 	{ 0xdf504199, __VMLINUX_SYMBOL_STR(noop_llseek) },
 	{ 0xe16b0d30, __VMLINUX_SYMBOL_STR(unregister_jprobe) },
@@ -28,10 +26,13 @@ __attribute__((section("__versions"))) = {
 	{ 0xb1bedeb7, __VMLINUX_SYMBOL_STR(register_jprobe) },
 	{ 0xfac2a257, __VMLINUX_SYMBOL_STR(proc_create_data) },
 	{ 0x8fc7f61a, __VMLINUX_SYMBOL_STR(init_net) },
+	{ 0x779a18af, __VMLINUX_SYMBOL_STR(kstrtoll) },
+	{ 0x9166fada, __VMLINUX_SYMBOL_STR(strncpy) },
+	{ 0x349cba85, __VMLINUX_SYMBOL_STR(strchr) },
+	{ 0x85df9b6c, __VMLINUX_SYMBOL_STR(strsep) },
 	{ 0xd2b09ce5, __VMLINUX_SYMBOL_STR(__kmalloc) },
 	{ 0xf432dd3d, __VMLINUX_SYMBOL_STR(__init_waitqueue_head) },
 	{ 0xdb7305a1, __VMLINUX_SYMBOL_STR(__stack_chk_fail) },
-	{ 0x27e1a049, __VMLINUX_SYMBOL_STR(printk) },
 	{ 0x4f8b5ddb, __VMLINUX_SYMBOL_STR(_copy_to_user) },
 	{ 0xba63339c, __VMLINUX_SYMBOL_STR(_raw_spin_unlock_bh) },
 	{ 0x4ca9669f, __VMLINUX_SYMBOL_STR(scnprintf) },
@@ -41,10 +42,13 @@ __attribute__((section("__versions"))) = {
 	{ 0x34f22f94, __VMLINUX_SYMBOL_STR(prepare_to_wait_event) },
 	{ 0x1000e51, __VMLINUX_SYMBOL_STR(schedule) },
 	{ 0xcf21d241, __VMLINUX_SYMBOL_STR(__wake_up) },
+	{ 0xb54533f7, __VMLINUX_SYMBOL_STR(usecs_to_jiffies) },
 	{ 0xc87c1f84, __VMLINUX_SYMBOL_STR(ktime_get) },
-	{ 0x1b9aca3f, __VMLINUX_SYMBOL_STR(jprobe_return) },
+	{ 0x7d11c268, __VMLINUX_SYMBOL_STR(jiffies) },
 	{ 0xda3e43d1, __VMLINUX_SYMBOL_STR(_raw_spin_unlock) },
 	{ 0xd52bf1ce, __VMLINUX_SYMBOL_STR(_raw_spin_lock) },
+	{ 0x1b9aca3f, __VMLINUX_SYMBOL_STR(jprobe_return) },
+	{ 0x27e1a049, __VMLINUX_SYMBOL_STR(printk) },
 	{ 0xbdfb6dbb, __VMLINUX_SYMBOL_STR(__fentry__) },
 };
 
@@ -54,4 +58,4 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "DE8814CC9AB32A80C7C6D6C");
+MODULE_INFO(srcversion, "E225DECAD5EA09763474771");
