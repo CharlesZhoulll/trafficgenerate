@@ -500,18 +500,30 @@ static __init int tcptuning_init(void)
     tcp_info.log = kcalloc(bufsize, sizeof(struct tcp_log), GFP_KERNEL);
 
     if (!tcp_info.log)
+    {
+        pr_info("Fail to allocate memory for tcp_info.log !\n");
         goto err0;
+    }
     if (!proc_create(procname, S_IRUSR, init_net.proc_net, &tcptuning_fops))
     {
-        pr_info("procname:%s\n", procname);
+        pr_info("Fail to create process !\n");
         goto err0;
     }
     if (register_jprobe(&tcp_tuning_jprobe) < 0)
+    {
+        pr_info("Fail to insert hook tcp_tuning_jprobe !\n");
         goto err1;
+    }
     if (register_jprobe(&tcp_close_jprobe) < 0)
+    {
+        pr_info("Fail to insert hook tcp_close_jprobe !\n");
         goto err1;
+    }
     if (!init_socket_htable())
-        goto err0;
+    {
+        pr_info("Fail to init hash table !\n");
+        goto err1;
+    }
     return 0;
 
     err0:
