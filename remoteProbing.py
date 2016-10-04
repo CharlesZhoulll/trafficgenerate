@@ -4,13 +4,14 @@ import sys, signal
 import os
 from scp import SCPClient
 
+userConfigFile = "config.ini"
 host = "129.10.99.173" # Remote server ip address
 uname = "fan_tcp" # Username
 password = "Ell-301" # Need for sudo execute command
 rsa = "/home/charles/.ssh/id_rsa" # Need for auto login
-remoteModuleDir = "/home/fan_tcp/Documents/fan/tcpprofiling/tcp_probe/" # Remote working dir
+remoteModuleDir = "/home/fan_tcp/Documents/fan/tcpprofiling/tcp_profile/" # Remote working dir
 traceFile = "tcptrace" # Tracefile name
-port = 12345 # Port the tcpprobe should listen to
+#port = 12345 # Port the tcpprobe should listen to
 jobs = []
 
 def parse(traceFile):
@@ -81,32 +82,36 @@ def execute(client, cmd, sudo):
         stdin.flush()
     return stderr.read()
 
-def preHandle(rates):
+def preHandle(config):
     configString = ""
-    ratelist = rates.split("\n");
-    for rate in ratelist:
-        info = rate.split(" ")
+    config_list = config.split("\n");
+    for item in config_list:
+        info = item.split(" ")
         if len(info) == 2:
             try:
                 if  (0<int(info[0])<= 65535) and (int(info[1]) >= 0):
                     configString += info[0]+":"+info[1] + "."
-                    continue
             except ValueError:
-                pass
-        print "Error in config file, at: " + rate
+                print "Error in config file, at: " + item
     return configString
 
 def startTcpTuning():
-    print "Running remote probing at host %s:%s" % (host, port)
-    print "Press CTRL+C to terminate..."
+    if not os.path.isfile(userConfigFile):
+        print "Config file not found, exit"
+
+    with open(userConfigFile) as f:
+        config_content = f.read().strip()
     configString = preHandle(config_content)
     if not configString:
         print "Nothing to be done."
         return
+
+    print "Running remote probing at host %s. Port: %s" % (host, configString)
+    print "Press CTRL+C to terminate..."
     client = connect()
     cmds = []
-    cmds.append('rmmod ' + remoteModuleDir + 'tcp_probe_fixed.ko')
-    cmds.append('insmod ' + remoteModuleDir + 'tcp_probe_fixed.ko '
+    cmds.append('rmmod ' + remoteModuleDir + 'tcp_profile.ko')
+    cmds.append('insmod ' + remoteModuleDir + 'tcp_profile.ko '
                 + 'procname=' + '\"' + traceFile + '\"'
                 + ' config=' + '\"' + configString + '\"')
     cmds.append('chmod 444 /proc/net/' + traceFile)
