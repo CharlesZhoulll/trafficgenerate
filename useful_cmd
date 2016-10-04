@@ -1,0 +1,53 @@
+plot "tcptrace.10000" using 1:4 title "cwnd" with linespoints lt rgb 'red',\
+"tcptrace.10000" using 1:($11/125000) title "est_pkt" with lines lt rgb 'green',\
+"tcptrace.10000" using 1:4 title "est_pkt" with lines lt rgb 'yellow',\
+"tcptrace.10000" using 1:4 title "est_pkt" with lines lt rgb 'brown'
+
+
+scp tcp_profile.c fan_tcp@129.10.99.173:/home/fan_tcp/Documents/fan/tcpprofiling/tcp_profile.c
+scp fan_tcp@129.10.99.173:/home/fan_tcp/Documents/fan/tcpserver/cmp.log cmp.log
+scp starttcpserver.py fan_tcp@129.10.99.173:/home/fan_tcp/Documents/fan/tcpserver/starttcpserver.py
+
+scp tcpServer fan_tcp@129.10.99.173:/home/fan_tcp/tcpServer
+
+scp fan_tcp@129.10.99.173:/home/fan_tcp/log log
+
+On virtual machine:
+
+change ip to 129.10.99.152
+
+Turn off tso, gso, gro, lro
+ethtool -K ethX tso off
+
+tc qdisc del dev wlan0 root
+tc qdisc add dev wlan0 root handle 1: netem rate 15Mbit limit 40
+tc qdisc add dev wlan0 parent 1: handle 10: netem delay 60ms
+
+
+tc qdisc add dev wlan0 root netem delay 60ms rate 15Mbit limit 50
+
+echo cubic | sudo tee /proc/sys/net/ipv4/tcp_congestion_control
+
+tc qdisc add dev wlan0 handle 1: root htb
+tc class add dev wlan0 parent 1: classid 1:1 htb rate 10mbit
+
+tc class add dev wlan0 parent 1:1 classid 1:10 htb rate 20mbit
+tc class add dev wlan0 parent 1:1 classid 1:11 htb rate 20mbit
+tc class add dev wlan0 parent 1:1 classid 1:12 htb rate 20mbit
+tc class add dev wlan0 parent 1:1 classid 1:13 htb rate 20mbit
+
+tc qdisc add dev wlan0 parent 1:10 handle 10: netem delay 40ms
+tc qdisc add dev wlan0 parent 1:11 handle 11: netem delay 60ms
+tc qdisc add dev wlan0 parent 1:12 handle 12: netem delay 80ms
+tc qdisc add dev wlan0 parent 1:13 handle 13: netem delay 100ms
+
+U32="tc filter add dev wlan0 protocol ip parent 1:1 prio 1 u32"
+
+tc filter add dev wlan0 protocol ip parent 1:1 prio 1 u32 match ip sport 10000 0xffff flowid 1:10
+
+$U32 match ip sport 10000 0xffff flowid 1:10
+$U32 match ip sport 20000 0xffff flowid 1:11
+$U32 u32 match ip sport 30000 0xffff flowid 1:12
+$U32 u32 match ip sport 40000 0xffff flowid 1:13
+
+tc qdisc del dev wlan0 root

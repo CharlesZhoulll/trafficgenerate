@@ -182,6 +182,7 @@ static inline void estimate_tp(struct sock *sk, struct socket_info *sk_info)
 
 static inline void tcp_start_profiling(struct sock *sk, struct socket_info *sk_info)
 {
+    pr_info("Here I am");
     // est_pdelay, moving average of rtt
     estimate_rtt(sk, sk_info);
     // throughput
@@ -191,8 +192,6 @@ static inline void tcp_start_profiling(struct sock *sk, struct socket_info *sk_i
 /* copies the probe data from the socket */
 static inline void copy_to_tcp_info(struct sock *sk, struct sk_buff *skb, struct tcp_log *p, struct socket_info *sk_info)
 {
-    // Paying 120% attention to the saddr, daddr, it may not what you think
-    // Better think this as server addr, and client addr
     struct tcp_sock *tp = tcp_sk(sk);
     struct inet_sock *inet = inet_sk(sk);
     p->tstamp = ktime_get();
