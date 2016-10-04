@@ -445,7 +445,7 @@ static inline int init_socket_htable(void)
     int port_len;
     char *config_entry, *rate, *port = NULL;
     u32 port_u;
-    while ((config_entry = strsep(&config, ";")) != NULL)
+    while ((config_entry = strsep(&config, ".")) != NULL)
     {
         if (config_entry[0] == '\0')
             break;
