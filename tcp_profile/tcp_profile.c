@@ -182,7 +182,6 @@ static inline void estimate_tp(struct sock *sk, struct socket_info *sk_info)
 
 static inline void tcp_start_profiling(struct sock *sk, struct socket_info *sk_info)
 {
-    pr_info("Here I am");
     // est_pdelay, moving average of rtt
     estimate_rtt(sk, sk_info);
     // throughput
@@ -258,7 +257,10 @@ static inline void tcptuning_sniff(struct sock *sk, struct sk_buff *skb)
     struct socket_info *sk_info;
     unsigned int head, tail;
     u32 sport;
+    u32 dport;
     sport = ntohs(inet->inet_sport);
+    dport = ntohs(inet->inet_dport);
+    pr_info("%u, %u", sport, dport);
     sk_info = find_by_key(sport);
     spin_lock(&tcp_info.producer_lock);
     if (sk_info)
