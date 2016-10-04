@@ -102,7 +102,6 @@ struct socket_info
     u32 total_byte_win; // total byte sent in one window
     u32 est_tp_avg;   // estimate throughput
     u32 est_tp_smp;  // sampled throughput
-    u8  tp_do_smp;	 // Just start up, do not take moving average
     u32 last_una;  // last un-acked seq, used in throughput estimation
     u32 tp_left_ts;  // left end of time window
     u32 accounted;  // duplicate acked segments
@@ -171,13 +170,9 @@ static inline void estimate_tp(struct sock *sk, struct socket_info *sk_info)
         if (sk_info->est_tp_avg == 0)
         {
             sk_info->est_tp_avg = sk_info->est_tp_smp;
-            sk_info->tp_do_smp = True;
         }
         else
         {
-        	if (sk_info->tp_do_smp)
-        		sk_info->est_tp_avg = sk_info->est_tp_smp;
-        	else
         		sk_info->est_tp_avg = filter(sk_info->est_tp_avg,sk_info->est_tp_smp);
         }
         sk_info->total_byte_win = 0;

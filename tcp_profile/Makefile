@@ -1,5 +1,5 @@
 ifneq ($(KERNELRELEASE),)
-   obj-m := tcp_probe.o
+   obj-m := tcp_profile.o
 else
 
 KERNELDIR ?= /lib/modules/$(shell uname -r)/build

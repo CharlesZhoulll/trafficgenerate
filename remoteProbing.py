@@ -81,14 +81,34 @@ def execute(client, cmd, sudo):
         stdin.flush()
     return stderr.read()
 
+def preHandle(rates):
+    configString = ""
+    ratelist = rates.split("\n");
+    for rate in ratelist:
+        info = rate.split(" ")
+        if len(info) == 2:
+            try:
+                if  (0<int(info[0])<= 65535) and (int(info[1]) >= 0):
+                    configString += info[0]+":"+info[1] + "."
+                    continue
+            except ValueError:
+                pass
+        print "Error in config file, at: " + rate
+    return configString
+
 def startTcpTuning():
     print "Running remote probing at host %s:%s" % (host, port)
     print "Press CTRL+C to terminate..."
+    configString = preHandle(config_content)
+    if not configString:
+        print "Nothing to be done."
+        return
     client = connect()
     cmds = []
     cmds.append('rmmod ' + remoteModuleDir + 'tcp_probe_fixed.ko')
     cmds.append('insmod ' + remoteModuleDir + 'tcp_probe_fixed.ko '
-                + 'procname=' + '\"' + traceFile + '\"' + ' port=' + port)
+                + 'procname=' + '\"' + traceFile + '\"'
+                + ' config=' + '\"' + configString + '\"')
     cmds.append('chmod 444 /proc/net/' + traceFile)
     cmds.append('cat /proc/net/' + traceFile + ' > ' + remoteModuleDir + traceFile)
     for cmd in cmds:
