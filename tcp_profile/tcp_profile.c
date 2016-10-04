@@ -100,8 +100,8 @@ struct socket_info
 
     // For throughput
     u32 total_byte_win; // total byte sent in one window
-    u32 est_tp_avg;   // estimate throughput
-    u32 est_tp_smp;  // sampled throughput
+    u32 tp_avg;   // estimate throughput
+    u32 tp_smp;  // sampled throughput
     u32 last_una;  // last un-acked seq, used in throughput estimation
     u32 tp_left_ts;  // left end of time window
     u32 accounted;  // duplicate acked segments
@@ -161,23 +161,23 @@ static inline void estimate_rtt(struct sock *sk, struct socket_info *sk_info)
 
 static void estimate_tp(struct sock *sk, struct socket_info *sk_info)
 {
-	struct timespec tv = ktime_to_timespec(
-			ktime_sub(ktime_get(), tcp_info.janus_start));
+	//struct timespec tv = ktime_to_timespec(
+	//		ktime_sub(ktime_get(), tcp_info.start));
 	const struct tcp_sock *tp = tcp_sk(sk);
 	s32 delta = tcp_time_stamp - sk_info->tp_left_ts;  // in hz
 	sk_info->total_byte_win += count_ack(sk, sk_info);
-	if (delta > sk_info->rtt) {
+	if (delta > sk_info->rtt_avg) {
 		u32 bytes_th = (tp->snd_cwnd >> 3) * tp->mss_cache;
     // Avoid application limited issue: only take sample if:
     // (1) We have got at least 1/8*cwnd's samples
     // (2) The time duration is between 1-2 RTT
-		if (sk_info->total_byte_win >= bytes_th && (delta <= 2*sk_info->rtt)) {
+		if (sk_info->total_byte_win >= bytes_th && (delta <= 2*sk_info->rtt_avg)) {
 			u32 tp_smp = sk_info->total_byte_win * HZ / delta;  // in byte/s
-			sk_info->est_tp_smp = tp_smp;
-			if (!sk_info->est_tp) {
-				sk_info->est_tp = tp_smp;
+			sk_info->tp_smp = tp_smp;
+			if (!sk_info->tp_avg) {
+				sk_info->tp_avg = tp_smp;
 			} else {
-					sk_info->est_tp = filter(sk_info->est_tp, tp_smp);
+					sk_info->tp_avg = filter(sk_info->tp_avg, tp_smp);
 			}
 		}
 		sk_info->total_byte_win = 0;
@@ -211,8 +211,8 @@ static inline void copy_to_tcp_info(struct sock *sk, struct sk_buff *skb, struct
     p->length = skb == NULL ? 0 : skb->len;
     p->rtt_smp = sk_info->rtt_smp;
     p->rtt_avg = sk_info->rtt_avg;
-    p->tp_avg = sk_info->est_tp_avg;
-    p->tp_smp = sk_info->est_tp_smp;
+    p->tp_avg = sk_info->tp_avg;
+    p->tp_smp = sk_info->tp_smp;
     return;
 }
 
@@ -241,7 +241,7 @@ static inline void reset_socket_info(struct socket_info *sk_info)
     sk_info->rtt_smp = 0;
     sk_info->total_byte_win = 0;
     sk_info->last_una = 0;
-    sk_info->est_tp_avg = 0;
+    sk_info->tp_avg = 0;
     sk_info->accounted = 0;
 }
 

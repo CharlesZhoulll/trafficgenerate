@@ -21,15 +21,15 @@ __attribute__((section("__versions"))) = {
 	{ 0x5d41c87c, __VMLINUX_SYMBOL_STR(param_ops_charp) },
 	{ 0xdf504199, __VMLINUX_SYMBOL_STR(noop_llseek) },
 	{ 0xe16b0d30, __VMLINUX_SYMBOL_STR(unregister_jprobe) },
-	{ 0x37a0cba, __VMLINUX_SYMBOL_STR(kfree) },
 	{ 0xc03fdabc, __VMLINUX_SYMBOL_STR(remove_proc_entry) },
+	{ 0x37a0cba, __VMLINUX_SYMBOL_STR(kfree) },
+	{ 0x779a18af, __VMLINUX_SYMBOL_STR(kstrtoll) },
+	{ 0x9166fada, __VMLINUX_SYMBOL_STR(strncpy) },
+	{ 0x85df9b6c, __VMLINUX_SYMBOL_STR(strsep) },
+	{ 0x349cba85, __VMLINUX_SYMBOL_STR(strchr) },
 	{ 0xb1bedeb7, __VMLINUX_SYMBOL_STR(register_jprobe) },
 	{ 0xfac2a257, __VMLINUX_SYMBOL_STR(proc_create_data) },
 	{ 0x8fc7f61a, __VMLINUX_SYMBOL_STR(init_net) },
-	{ 0x779a18af, __VMLINUX_SYMBOL_STR(kstrtoll) },
-	{ 0x9166fada, __VMLINUX_SYMBOL_STR(strncpy) },
-	{ 0x349cba85, __VMLINUX_SYMBOL_STR(strchr) },
-	{ 0x85df9b6c, __VMLINUX_SYMBOL_STR(strsep) },
 	{ 0xd2b09ce5, __VMLINUX_SYMBOL_STR(__kmalloc) },
 	{ 0xf432dd3d, __VMLINUX_SYMBOL_STR(__init_waitqueue_head) },
 	{ 0xdb7305a1, __VMLINUX_SYMBOL_STR(__stack_chk_fail) },
@@ -58,4 +58,4 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "E918F0409EFBDC8828B3253");
+MODULE_INFO(srcversion, "567A75475058F0D6D254EBA");
