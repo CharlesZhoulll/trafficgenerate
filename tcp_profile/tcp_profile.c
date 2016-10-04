@@ -503,7 +503,7 @@ static __init int tcptuning_init(void)
         goto err0;
     if (!proc_create(procname, S_IRUSR, init_net.proc_net, &tcptuning_fops))
     {
-        pr_info(procname);
+        pr_info("procname:%s\n", procname);
         goto err0;
     }
     if (register_jprobe(&tcp_tuning_jprobe) < 0)
