@@ -152,7 +152,6 @@ static inline u32 count_ack(struct sock *sk, struct socket_info *sk_info)
     return cumul_ack;
 }
 
-
 static inline void estimate_rtt(struct sock *sk, struct socket_info *sk_info)
 {
     const struct tcp_sock *tp = tcp_sk(sk);
@@ -160,24 +159,30 @@ static inline void estimate_rtt(struct sock *sk, struct socket_info *sk_info)
     sk_info->rtt_avg = filter(sk_info->rtt_avg, sk_info->rtt_smp);
 }
 
-static inline void estimate_tp(struct sock *sk, struct socket_info *sk_info)
+static void estimate_tp(struct sock *sk, struct socket_info *sk_info)
 {
-    s32 delta = (tcp_time_stamp - sk_info->tp_left_ts) * 1000 / HZ;  // in ms
-    sk_info->total_byte_win += count_ack(sk, sk_info);
-    if (delta > sk_info->rtt_smp)
-    {
-        sk_info->est_tp_smp = sk_info->total_byte_win * 1000 / delta;  // in byte/s
-        if (sk_info->est_tp_avg == 0)
-        {
-            sk_info->est_tp_avg = sk_info->est_tp_smp;
-        }
-        else
-        {
-        		sk_info->est_tp_avg = filter(sk_info->est_tp_avg,sk_info->est_tp_smp);
-        }
-        sk_info->total_byte_win = 0;
-        sk_info->tp_left_ts = tcp_time_stamp;
-    }
+	struct timespec tv = ktime_to_timespec(
+			ktime_sub(ktime_get(), tcp_info.janus_start));
+	const struct tcp_sock *tp = tcp_sk(sk);
+	s32 delta = tcp_time_stamp - sk_info->tp_left_ts;  // in hz
+	sk_info->total_byte_win += count_ack(sk, sk_info);
+	if (delta > sk_info->rtt) {
+		u32 bytes_th = (tp->snd_cwnd >> 3) * tp->mss_cache;
+    // Avoid application limited issue: only take sample if:
+    // (1) We have got at least 1/8*cwnd's samples
+    // (2) The time duration is between 1-2 RTT
+		if (sk_info->total_byte_win >= bytes_th && (delta <= 2*sk_info->rtt)) {
+			u32 tp_smp = sk_info->total_byte_win * HZ / delta;  // in byte/s
+			sk_info->est_tp_smp = tp_smp;
+			if (!sk_info->est_tp) {
+				sk_info->est_tp = tp_smp;
+			} else {
+					sk_info->est_tp = filter(sk_info->est_tp, tp_smp);
+			}
+		}
+		sk_info->total_byte_win = 0;
+		sk_info->tp_left_ts = tcp_time_stamp;
+	}
 }
 
 static inline void tcp_start_profiling(struct sock *sk, struct socket_info *sk_info)
@@ -214,9 +219,9 @@ static inline void copy_to_tcp_info(struct sock *sk, struct sk_buff *skb, struct
 static inline int tcptuning_sprint(struct tcp_log *p, char *tbuf, int n)
 {
     struct timespec tv = ktime_to_timespec(ktime_sub(ktime_get(), tcp_info.start));
-    int ret = scnprintf(tbuf, n, "%lu.%09lu %pI4:%u %pI4:%u %u %u %u %u %u %u\n",
+    int ret = scnprintf(tbuf, n, "%lu.%09lu %pI4:%u %pI4:%u %u %u %u %u %u %u %u\n",
             (unsigned long) tv.tv_sec, (unsigned long) tv.tv_nsec, &p->saddr, ntohs(p->sport),
-            &p->daddr, ntohs(p->dport), p->snd_cwnd, p->ssthresh,  p->rtt_smp, p->rtt_avg,
+            &p->daddr, ntohs(p->dport), p->snd_cwnd, p->snd_wnd, p->ssthresh,  p->rtt_smp, p->rtt_avg,
               p->tp_avg, p->tp_smp);
     return ret;
 }
@@ -312,14 +317,15 @@ static int jtcp_rcv_established(struct sock *sk, struct sk_buff *skb, struct tcp
 static void jtcp_close(struct sock *sk, long timeout)
 {
     struct inet_sock *inet;
-    u32 sport;
+    u32 sport, dport;
     struct socket_info *sk_info;
     inet = inet_sk(sk);
     sport = ntohs(inet->inet_sport);
+    dport = ntohs(inet->inet_dport);
     sk_info = find_by_key(sport);
     if (sk_info)
     {
-        pr_info("%u, end closing... ! \n", sk_info->sport);
+        pr_info("%u->%u, connection end ! \n", sport, dport);
         reset_socket_info(sk_info);
     }
     jprobe_return();
