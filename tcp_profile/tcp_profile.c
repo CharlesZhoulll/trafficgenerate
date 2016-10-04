@@ -257,10 +257,7 @@ static inline void tcptuning_sniff(struct sock *sk, struct sk_buff *skb)
     struct socket_info *sk_info;
     unsigned int head, tail;
     u32 sport;
-    u32 dport;
     sport = ntohs(inet->inet_sport);
-    dport = ntohs(inet->inet_dport);
-    pr_info("%u, %u", sport, dport);
     sk_info = find_by_key(sport);
     spin_lock(&tcp_info.producer_lock);
     if (sk_info)
@@ -423,7 +420,7 @@ static ssize_t tcptuning_read(struct file *file, char __user *buf,
 
 static int tcptuning_release(struct inode *inode, struct file *file)
 {
-    printk("closing\n");
+    printk("TCP profiling starts working. See you next time.\n");
     return 0;
 }
 
@@ -487,8 +484,6 @@ static inline int init_socket_htable(void)
 static __init int tcptuning_init(void)
 {
     int ret = -ENOMEM;
-
-    pr_info("TCP profiling starts working ! \n");
     init_waitqueue_head(&tcp_info.wait);
     spin_lock_init(&tcp_info.producer_lock);
     spin_lock_init(&tcp_info.consumer_lock);
@@ -524,6 +519,7 @@ static __init int tcptuning_init(void)
         pr_info("Fail to init hash table !\n");
         goto err1;
     }
+    pr_info("TCP profiling starts working ! \n");
     return 0;
 
     err0:
