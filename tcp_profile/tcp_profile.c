@@ -169,7 +169,6 @@ static void estimate_tp(struct sock *sk, struct socket_info *sk_info)
 	s32 delta = tcp_time_stamp - sk_info->tp_left_ts;  // in hz
 	sk_info->total_byte_win += count_ack(sk, sk_info);
 	if (delta > max_t(u32, MIN_BW_SMPLE_RATE, sk_info->rtt_smp)) {
-    pr_info("%u, %u\n", MIN_BW_SMPLE_RATE, sk_info->rtt_smp);
 		u32 bytes_th = (tp->snd_cwnd >> 3) * tp->mss_cache;
     // Avoid application limited issue: only take sample if:
     // (1) We have got at least 1/8*cwnd's samples
@@ -183,6 +182,9 @@ static void estimate_tp(struct sock *sk, struct socket_info *sk_info)
 					sk_info->tp_avg = filter(sk_info->tp_avg, tp_smp);
 			}
 		}
+    else{
+      pr_info("%u, %u\n", sk_info->total_byte_win, delta);
+    }
 		sk_info->total_byte_win = 0;
 		sk_info->tp_left_ts = tcp_time_stamp;
 	}
