@@ -501,18 +501,14 @@ static __init int tcptuning_init(void)
 
     if (!tcp_info.log)
         goto err0;
-
-    if (!init_socket_htable())
-            goto err0;
-
-
     if (!proc_create(procname, S_IRUSR, init_net.proc_net, &tcptuning_fops))
         goto err0;
     if (register_jprobe(&tcp_tuning_jprobe) < 0)
         goto err1;
     if (register_jprobe(&tcp_close_jprobe) < 0)
         goto err1;
-    //tcp_info_init();
+    if (!init_socket_htable())
+        goto err0;
     return 0;
 
     err1:
