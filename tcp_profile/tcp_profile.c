@@ -163,8 +163,8 @@ static inline void estimate_rtt(struct sock *sk, struct socket_info *sk_info)
 
 static void estimate_tp(struct sock *sk, struct socket_info *sk_info)
 {
-	//struct timespec tv = ktime_to_timespec(
-	//		ktime_sub(ktime_get(), tcp_info.start));
+	struct timespec tv = ktime_to_timespec(
+			ktime_sub(ktime_get(), tcp_info.start));
 	const struct tcp_sock *tp = tcp_sk(sk);
 	s32 delta = tcp_time_stamp - sk_info->tp_left_ts;  // in hz
 	sk_info->total_byte_win += count_ack(sk, sk_info);
@@ -182,9 +182,10 @@ static void estimate_tp(struct sock *sk, struct socket_info *sk_info)
 					sk_info->tp_avg = filter(sk_info->tp_avg, tp_smp);
 			}
 		}
-    else{
-      pr_info("%u, %u\n", sk_info->total_byte_win, delta);
-    }
+    //else{
+    //  pr_info("%lu.%09lu, %u, %u, %u, %u\n", (unsigned long) tv.tv_sec, (unsigned long) tv.tv_nsec,
+    //  sk_info->total_byte_win, bytes_th, delta, sk_info->rtt_smp);
+    //}
 		sk_info->total_byte_win = 0;
 		sk_info->tp_left_ts = tcp_time_stamp;
 	}
