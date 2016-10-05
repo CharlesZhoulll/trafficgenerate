@@ -1,5 +1,7 @@
 #!/bin/bash
+branch="$1"
+comment="$2"
 git add .
-git commit -m "a simple fix"
-git push -u origin dev
+git commit -m "$comment"
+git push -u origin "$branch"
 
