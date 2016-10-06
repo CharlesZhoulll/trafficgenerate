@@ -17,7 +17,7 @@ def finish(*args):
         except:
             pass
     sys.exit(0)
-    
+
 def startServer(serverID, port):
     print "Server %s start, listen on port: %d \n" % (serverID, port)
 ##    if port == 10000:
@@ -28,7 +28,7 @@ def startServer(serverID, port):
 ##        time = 40
 ##    else:
 ##        time = 20
-    cmd = './tcpserver' + ' -t ' + str(time) + ' -p ' + str(port)
+    cmd = './tcpserver' + ' -t ' + str(time) + ' -p ' + str(port) + ' -s 0'
     #cmd = "ping google.com"
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             shell = True)
@@ -36,11 +36,11 @@ def startServer(serverID, port):
     #line = proc.stdout.readline()
     #print line
     line = proc.stderr.readline()
-    print line 
+    print line
     line = proc.stdout.read()
     print line
 
-    
+
 def run():
     os.system("pkill tcpserver")
     for i in xrange(nServers):
@@ -49,7 +49,7 @@ def run():
         thread.start()
     signal.signal(signal.SIGINT, finish)
     signal.pause()
-    
+
 if __name__ == '__main__':
     if len(sys.argv) >= 2:
         nServers = int(sys.argv[1])
