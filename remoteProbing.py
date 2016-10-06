@@ -7,7 +7,7 @@ from scp import SCPClient
 userConfigFile = "config.ini"
 host = "129.10.99.173" # Remote server ip address
 uname = "fan_tcp" # Username
-password = "Ell-301" # Need for sudo execute command
+password = "pythonpython" # Need for sudo execute command
 rsa = "/home/charles/.ssh/id_rsa" # Need for auto login
 remoteModuleDir = "/home/fan_tcp/Documents/fan/tcpprofiling/tcp_profile/" # Remote working dir
 traceFile = "tcpprofiling" # Tracefile name
@@ -27,7 +27,7 @@ def parse(traceFile):
         if fwDist.has_key(sPort):
             fwDist[sPort].write(line)
         else:
-            traceFileName = traceFile + '.' + sPort
+            traceFileName = './trace/' + traceFile + '.' + sPort
             fw = open(traceFileName,'w')
             fwDist[sPort] = fw
             fw.write(line)

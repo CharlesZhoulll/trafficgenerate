@@ -1,0 +1,5 @@
+plot "tcpprofiling.10000" using 1:4 title "sth" with linespoints lt rgb 'red',\
+"tcpprofiling.10001" using 1:4 title "sth" with lines lt rgb 'green',\
+"tcpprofiling.10000" using 1:7 title "sth" with lines lt rgb 'grey'
+pause -1 "Hit any key to continue"
+

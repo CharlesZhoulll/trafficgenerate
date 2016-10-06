@@ -1,7 +1,5 @@
-plot "tcpprofiling.10000" using 1:($9/125000) title "cwnd" with linespoints lt rgb 'red',\
-"tcpprofiling.10000" using 1:($10/125000) title "est_pkt" with lines lt rgb 'green',\
-"tcpprofiling.10000" using 1:4 title "est_pkt" with lines lt rgb 'yellow',\
-"tcpprofiling.10000" using 1:4 title "est_pkt" with lines lt rgb 'brown'
+plot "tcpprofiling.10000" using 1:4 title "rtt" with linespoints lt rgb 'red',\
+"tcpprofiling.10001" using 1:4 title "rtt" with lines lt rgb 'green'
 
 
 scp tcp_profile.c fan_tcp@129.10.99.173:/home/fan_tcp/Documents/fan/tcpprofiling/tcp_profile.c
@@ -22,6 +20,6 @@ ethtool -K ethX tso off
 
 tc qdisc add dev wlan0 root netem delay 60ms rate 15Mbit limit 50
 
-echo bbr | sudo tee /proc/sys/net/ipv4/tcp_congestion_control
+echo cubic | sudo tee /proc/sys/net/ipv4/tcp_congestion_control
 
 tc qdisc del dev wlan0 root
